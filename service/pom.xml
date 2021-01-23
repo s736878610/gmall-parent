@@ -15,5 +15,15 @@
         <module>service-product</module>
     </modules>
 
+    <dependencies>
+        <!--实体类-->
+        <dependency>
+            <groupId>com.atguigu.gmall</groupId>
+            <artifactId>model</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+    </dependencies>
+
 
 </project>

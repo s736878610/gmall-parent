@@ -1,7 +1,9 @@
 package com.atguigu.gmall.product.mapper;
 
-import com.atguigu.gmall.product.entity.BaseCategory2;
+import com.atguigu.gmall.model.product.BaseCategory2;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Mapper;
+import org.springframework.stereotype.Repository;
 
 /**
  * <p>
@@ -11,6 +13,8 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * @author zhongyuan
  * @since 2021-01-21
  */
+@Mapper
+@Repository
 public interface BaseCategory2Mapper extends BaseMapper<BaseCategory2> {
 
 }
