@@ -75,10 +75,21 @@ public class BaseManageServiceImpl implements BaseManageService {
      */
     @Override
     public List<BaseAttrInfo> getAttrInfoList(Long category3Id) {
+        //平台属性
         QueryWrapper<BaseAttrInfo> wrapper = new QueryWrapper<>();
         wrapper.eq("category_level", 3);
         wrapper.eq("category_id", category3Id);
         List<BaseAttrInfo> baseAttrInfoList = baseAttrInfoMapper.selectList(wrapper);
+
+        if (baseAttrInfoList != null && baseAttrInfoList.size() > 0) {
+            for (BaseAttrInfo baseAttrInfo : baseAttrInfoList) {
+                //平台属性值
+                QueryWrapper<BaseAttrValue> attrValueQueryWrapper = new QueryWrapper<>();
+                attrValueQueryWrapper.eq("attr_id",baseAttrInfo.getId());
+                List<BaseAttrValue> baseAttrValueList = baseAttrValueMapper.selectList(attrValueQueryWrapper);
+                baseAttrInfo.setAttrValueList(baseAttrValueList);
+            }
+        }
         return baseAttrInfoList;
     }
 

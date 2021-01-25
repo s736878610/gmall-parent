@@ -5,4 +5,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 
 public interface SkuInfoService {
     IPage<SkuInfo> getSkuInfoPage(Long page, Long limit);
+
+    void saveSkuInfo(SkuInfo skuInfo);
+
+    void onSale(Long skuId);
+
+    void cancelSale(Long skuId);
 }
