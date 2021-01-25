@@ -16,4 +16,4 @@ mybatis-plus:
   mapper-locations: classpath:mapper/*Mapper.xml # mapper路径
 
 fileServer:
-url: http://42.192.250.48:8080/
+url: http://42.192.250.48:80/

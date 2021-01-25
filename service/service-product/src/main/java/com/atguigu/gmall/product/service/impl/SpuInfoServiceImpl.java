@@ -68,8 +68,8 @@ public class SpuInfoServiceImpl implements SpuInfoService {
 
     /**
      * Spu 分页查询
-     * @param page
-     * @param limit
+     * @param page 当前页
+     * @param limit 每页条数
      * @param category3Id
      * @return
      */

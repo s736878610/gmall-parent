@@ -18,6 +18,12 @@
             <version>1.0</version>
         </dependency>
 
+        <!--FastFDS 文件存储服务器-->
+        <dependency>
+            <groupId>net.oschina.zcx7878</groupId>
+            <artifactId>fastdfs-client-java</artifactId>
+        </dependency>
+
     </dependencies>
 
 </project>
