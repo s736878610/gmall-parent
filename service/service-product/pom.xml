@@ -12,12 +12,6 @@
     <artifactId>service-product</artifactId>
 
     <dependencies>
-        <dependency>
-            <groupId>com.atguigu.gmall</groupId>
-            <artifactId>service-util</artifactId>
-            <version>1.0</version>
-        </dependency>
-
         <!--FastFDS 文件存储服务器-->
         <dependency>
             <groupId>net.oschina.zcx7878</groupId>

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.gmall.product.mapper.SkuSaleAttrValueMapper">
+
+    <resultMap id="getSpuSaleAttrListCheckBySkuResultMap" type="com.atguigu.gmall.model.product.SpuSaleAttr" autoMapping="true">
+        <id property="id" column="id"></id>
+
+        <collection property="spuSaleAttrValueList"
+                    ofType="com.atguigu.gmall.model.product.SpuSaleAttrValue" autoMapping="true">
+            <id column="sale_attr_value_id" property="id"></id>
+        </collection>
+    </resultMap>
+
+    <!--获取spu销售属性，spu销售属性值，对应的sku销售属性-->
+    <select id="selectSpuSaleAttrListCheckBySku" resultMap="getSpuSaleAttrListCheckBySkuResultMap">
+        SELECT
+            sa.id,
+            sa.spu_id,
+            sa.sale_attr_name,
+            sa.base_sale_attr_id,
+            sv.id sale_attr_value_id,
+            sv.sale_attr_value_name,
+            IF
+                ( ksv.sale_attr_value_id, 1, 0 ) AS 'isChecked'
+        FROM
+            spu_sale_attr sa
+                INNER JOIN spu_sale_attr_value sv ON sa.spu_id = sv.spu_id
+                AND sa.base_sale_attr_id = sv.base_sale_attr_id
+                LEFT JOIN sku_sale_attr_value ksv ON ksv.sale_attr_value_id = sv.id
+                AND ksv.sku_id = #{skuId}
+        WHERE
+            sa.spu_id = #{spuId}
+        ORDER BY
+            sv.base_sale_attr_id,
+            sv.id
+    </select>
+
+    <!--获取销售属性切换的hash表-->
+    <select id="selectSaleAttrValuesBySpu" resultType="java.util.Map">
+        SELECT
+            sku_id,
+            GROUP_CONCAT( sale_attr_value_id ORDER BY sp.base_sale_attr_id ASC SEPARATOR '|' ) value_ids
+        FROM
+            `sku_sale_attr_value` sv
+                INNER JOIN `spu_sale_attr_value` sp ON sp.id = sv.sale_attr_value_id
+        WHERE
+            sv.spu_id = #{spuId}
+
+        GROUP BY
+            sku_id
+    </select>
+
+
+</mapper>

@@ -8,6 +8,18 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.jdbc.Driver
+  # nacos地址
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.200.128
+  # 服务名
+  application:
+    name: service-product
+  # redis配置
+  redis:
+    host: 192.168.200.128
+    port: 6379
 
 # mybatis
 mybatis-plus:
@@ -15,5 +27,6 @@ mybatis-plus:
     map-underscore-to-camel-case: true # 驼峰命名
   mapper-locations: classpath:mapper/*Mapper.xml # mapper路径
 
-fileServer:
-url: http://42.192.250.48:80/
+#fileServer:
+#url: http://42.192.250.48:80/
+

@@ -13,6 +13,8 @@
     <packaging>pom</packaging>
     <modules>
         <module>service-product</module>
+        <module>service-item</module>
+        <module>service-test</module>
     </modules>
 
     <dependencies>
@@ -20,6 +22,20 @@
         <dependency>
             <groupId>com.atguigu.gmall</groupId>
             <artifactId>model</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!--service-util-->
+        <dependency>
+            <groupId>com.atguigu.gmall</groupId>
+            <artifactId>service-util</artifactId>
+            <version>1.0</version>
+        </dependency>
+
+        <!--远程调用客户端-->
+        <dependency>
+            <groupId>com.atguigu.gmall</groupId>
+            <artifactId>service-client</artifactId>
             <version>1.0</version>
         </dependency>
 
