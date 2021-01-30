@@ -128,7 +128,8 @@ public class SkuInfoServiceImpl implements SkuInfoService {
     }
 
     /**
-     * 根据skuId查询商品信息、图片信息(无缓存)
+     * 根据skuId查询商品信息、图片信息
+     * 注解实现分布式锁  redis缓存
      *
      * @param skuId
      * @return
@@ -137,9 +138,7 @@ public class SkuInfoServiceImpl implements SkuInfoService {
     @GmallCache(prefix = "sku")
     public SkuInfo getSkuInfoById(Long skuId) {
         SkuInfo skuInfo = null;
-
         skuInfo = getSkuInfoFromDb(skuId);
-
         return skuInfo;
     }
 
