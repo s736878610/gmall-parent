@@ -1,0 +1,42 @@
+server:
+  port: 8203
+
+spring:
+  # nacos配置
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.200.128
+  # 服务名
+  application:
+    name: service-list
+  # redis配置
+  redis:
+    host: 192.168.200.128
+    port: 6379
+  # es配置
+  elasticsearch:
+    rest:
+      uris: http://192.168.200.128:9200
+
+# feign超时设置
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 600000
+        readTimeout: 600000
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -15,14 +15,14 @@ import java.util.Arrays;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@Component
-@Aspect
+//@Component
+//@Aspect
 public class GmallCacheAspectTea {
 
     @Autowired
     RedisTemplate redisTemplate;
 
-    @Around("@annotation(com.atguigu.gmall.aspect.GmallCache)")
+    //@Around("@annotation(com.atguigu.gmall.aspect.GmallCache)")
     public Object cacheAroundAdvice(ProceedingJoinPoint point) {
         Object proceed = null;
 

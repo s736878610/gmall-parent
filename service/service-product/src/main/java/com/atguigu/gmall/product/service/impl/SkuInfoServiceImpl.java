@@ -2,6 +2,7 @@ package com.atguigu.gmall.product.service.impl;
 
 import com.atguigu.gmall.aspect.GmallCache;
 import com.atguigu.gmall.constant.RedisConst;
+import com.atguigu.gmall.list.client.ListFeignClient;
 import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.mapper.SkuAttrValueMapper;
 import com.atguigu.gmall.product.mapper.SkuImageMapper;
@@ -36,6 +37,8 @@ public class SkuInfoServiceImpl implements SkuInfoService {
     private SkuImageMapper skuImageMapper;
     @Autowired
     private RedisTemplate redisTemplate;
+    @Autowired
+    private ListFeignClient listFeignClient;
 
 
     /**
@@ -108,6 +111,7 @@ public class SkuInfoServiceImpl implements SkuInfoService {
         skuInfoMapper.updateById(skuInfo);
 
         // 同步搜索引擎
+        listFeignClient.onSale(skuId);
 
     }
 
@@ -124,7 +128,7 @@ public class SkuInfoServiceImpl implements SkuInfoService {
         skuInfoMapper.updateById(skuInfo);
 
         // 同步搜索引擎
-
+        listFeignClient.cancelSale(skuId);
     }
 
     /**

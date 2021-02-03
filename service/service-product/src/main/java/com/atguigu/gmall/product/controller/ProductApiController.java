@@ -1,9 +1,11 @@
 package com.atguigu.gmall.product.controller;
 
-import com.atguigu.gmall.model.product.BaseCategoryView;
-import com.atguigu.gmall.model.product.SkuInfo;
-import com.atguigu.gmall.model.product.SpuSaleAttr;
+import com.alibaba.fastjson.JSONObject;
+import com.atguigu.gmall.model.list.SearchAttr;
+import com.atguigu.gmall.model.product.*;
+import com.atguigu.gmall.product.mapper.SkuAttrValueMapper;
 import com.atguigu.gmall.product.service.BaseCategoryViewService;
+import com.atguigu.gmall.product.service.BaseTrademarkService;
 import com.atguigu.gmall.product.service.SkuInfoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -22,6 +24,10 @@ public class ProductApiController {
     private SkuInfoService skuInfoService;
     @Autowired
     private BaseCategoryViewService baseCategoryViewService;
+    @Autowired
+    private BaseTrademarkService baseTrademarkService;
+    @Autowired
+    private SkuAttrValueMapper skuAttrValueMapper;
 
 
     /**
@@ -75,6 +81,36 @@ public class ProductApiController {
     @GetMapping("getSaleAttrValuesBySpu/{spuId}")
     List<Map<String,Object>> getSaleAttrValuesBySpu(@PathVariable("spuId")Long spuId){
         return skuInfoService.getSaleAttrValuesBySpu(spuId);
+    }
+
+    /**
+     * 首页分类列表查询
+     * @return
+     */
+    @GetMapping("getBaseCategoryList")
+    List<JSONObject> getBaseCategoryList(){
+        return baseCategoryViewService.getBaseCategoryList();
+    }
+
+    /**
+     * 根据id获取品牌信息
+     * @param tmId
+     * @return
+     */
+    @GetMapping("getBaseTrademarkById/{tmId}")
+    BaseTrademark getBaseTrademarkById(@PathVariable("tmId") Long tmId){
+        return baseTrademarkService.getBaseTrademarkById(tmId);
+    }
+
+    /**
+     * 根据skuId获取平台属性
+     * @param skuId
+     * @return
+     */
+    @GetMapping("getSearchAttrBySkuId/{skuId}")
+    List<SearchAttr> getSearchAttrBySkuId(@PathVariable("skuId") Long skuId){
+        List<SearchAttr> searchAttrList = skuAttrValueMapper.selectSearchAttrBySkuId(skuId);
+        return searchAttrList;
     }
 
 }

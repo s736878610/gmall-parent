@@ -39,4 +39,15 @@ public class BaseTrademarkServiceImpl implements BaseTrademarkService {
     public List<BaseTrademark> getTrademarkList() {
         return baseTrademarkMapper.selectList(null);
     }
+
+    /**
+     * 根据id获取品牌信息
+     * @param tmId
+     * @return
+     */
+    @Override
+    public BaseTrademark getBaseTrademarkById(Long tmId) {
+        BaseTrademark baseTrademark = baseTrademarkMapper.selectById(tmId);
+        return baseTrademark;
+    }
 }

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.atguigu.gmall.product.mapper.SkuAttrValueMapper">
+
+    <!--根据skuId获取平台属性-->
+    <select id="selectSearchAttrBySkuId" resultMap="selectSearchAttrResultMap">
+        SELECT
+            bai.id attrId,
+            bai.attr_name attrName,
+            bav.value_name attrValue
+        FROM
+            sku_attr_value sav,
+            base_attr_info bai,
+            base_attr_value bav
+        WHERE
+            sav.attr_id = bai.id
+          AND sav.value_id = bav.id
+          AND sav.sku_id =#{skuId}
+    </select>
+
+    <resultMap id="selectSearchAttrResultMap" type="com.atguigu.gmall.model.list.SearchAttr" autoMapping="true">
+
+    </resultMap>
+</mapper>
