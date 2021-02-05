@@ -56,7 +56,6 @@ public class ListApiServiceImpl implements ListApiService {
     private GoodsRepository goodsRepository;
     @Autowired
     RestHighLevelClient restHighLevelClient;
-    private NestedAggregationBuilder nestedAggregationBuilder;
 
     /**
      * 首页分类列表查询(远程调用)
