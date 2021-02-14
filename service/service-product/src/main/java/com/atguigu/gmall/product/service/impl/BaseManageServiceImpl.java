@@ -104,7 +104,7 @@ public class BaseManageServiceImpl implements BaseManageService {
         if (baseAttrInfo.getId() != null) {
             //修改
             baseAttrInfoMapper.updateById(baseAttrInfo);
-            //修改平台属性值   先删除 再新增
+            //修改平台属性值   先删除 再新增 = 修改
             QueryWrapper<BaseAttrValue> wrapper = new QueryWrapper<>();
             //base_attr_value表的attr_id字段=base_attr_info表的id
             wrapper.eq("attr_id", baseAttrInfo.getId());

@@ -60,7 +60,7 @@ public class GmallCacheAspect {
         proceed = getCache(methodSignature, commonKey);
         if (proceed == null) {
             try {
-                // 防止缓存穿透、缓存击穿
+                // redis分布式锁  确保线程安全
                 String lockTag = UUID.randomUUID().toString();
                 Boolean OK = redisTemplate.opsForValue().setIfAbsent(commonKey + ":lock", lockTag, 3, TimeUnit.MINUTES);
 

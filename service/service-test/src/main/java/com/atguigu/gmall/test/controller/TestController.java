@@ -10,6 +10,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.concurrent.TimeUnit;
+
 @RestController
 public class TestController {
 
@@ -53,6 +55,14 @@ public class TestController {
             redisTemplate.opsForValue().set("stock", stock);
         } finally {
             lock.unlock(); // 解锁
+        }
+
+        try {
+            // tryLock(long waitTime, long leaseTime, TimeUnit unit)
+            // 尝试加锁，等待10S，加锁后3秒过期
+            lock.tryLock(10L,3L, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return Result.ok(stock);
