@@ -57,13 +57,13 @@ public class TestController {
             lock.unlock(); // 解锁
         }
 
-        try {
-            // tryLock(long waitTime, long leaseTime, TimeUnit unit)
-            // 尝试加锁，等待10S，加锁后3秒过期
-            lock.tryLock(10L,3L, TimeUnit.SECONDS);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+//        try {
+//            // tryLock(long waitTime, long leaseTime, TimeUnit unit)
+//            // 尝试加锁，等待10S，加锁后3秒过期
+//            lock.tryLock(10L,3L, TimeUnit.SECONDS);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
 
         return Result.ok(stock);
     }

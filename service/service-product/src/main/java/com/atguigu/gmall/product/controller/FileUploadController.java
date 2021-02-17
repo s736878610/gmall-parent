@@ -29,8 +29,8 @@ public class FileUploadController {
     public Result fileUpload(@RequestParam("file") MultipartFile file) {
         //获取tracker.conf文件的绝对路径
         String path = FileUploadController.class.getClassLoader().getResource("tracker.conf").getPath();
-        String url = "http://42.192.250.48:80";
-        //String url = "http://192.168.200.128:8080";
+        //String url = "http://42.192.250.48:80";
+        String url = "http://192.168.200.128:8080";
         try {
             // 初始化
             ClientGlobal.init(path);

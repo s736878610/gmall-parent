@@ -133,13 +133,13 @@ public class SkuInfoServiceImpl implements SkuInfoService {
 
     /**
      * 根据skuId查询商品信息、图片信息
-     * 注解实现分布式锁  redis缓存
+     *
      *
      * @param skuId
      * @return
      */
     @Override
-    @GmallCache(prefix = "sku")
+    @GmallCache(prefix = "sku")// 注解实现分布式锁  redis缓存
     public SkuInfo getSkuInfoById(Long skuId) {
         SkuInfo skuInfo = null;
         skuInfo = getSkuInfoFromDb(skuId);
@@ -244,6 +244,7 @@ public class SkuInfoServiceImpl implements SkuInfoService {
      * @return
      */
     @Override
+    @GmallCache(prefix = "sku-SpuSale")// 注解实现分布式锁  redis缓存
     public List<SpuSaleAttr> getSpuSaleAttrListCheckBySku(Long spuId, Long skuId) {
         return skuSaleAttrValueMapper.selectSpuSaleAttrListCheckBySku(spuId, skuId);
     }
@@ -255,6 +256,7 @@ public class SkuInfoServiceImpl implements SkuInfoService {
      * @return
      */
     @Override
+    @GmallCache(prefix = "sku-SaleHash")// 注解实现分布式锁  redis缓存
     public List<Map<String, Object>> getSaleAttrValuesBySpu(Long spuId) {
         return skuSaleAttrValueMapper.selectSaleAttrValuesBySpu(spuId);
     }

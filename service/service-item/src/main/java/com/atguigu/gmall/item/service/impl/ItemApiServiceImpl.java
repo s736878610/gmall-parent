@@ -51,7 +51,7 @@ public class ItemApiServiceImpl implements ItemApiService {
     }
 
     /**
-     * 多线程执行
+     * 多线程执行(使用CompletableFuture 异步编排 技术)
      *
      * @param skuId
      * @return
