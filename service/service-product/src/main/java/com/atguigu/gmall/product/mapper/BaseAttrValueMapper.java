@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * <p>
- * 属性值表 Mapper 接口
+ * 属性值表 mapper 接口
  * </p>
  *
  * @author zhongyuan

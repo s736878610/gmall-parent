@@ -4,13 +4,12 @@ package com.atguigu.gmall.product.controller;
 import com.atguigu.gmall.model.product.*;
 import com.atguigu.gmall.product.service.BaseManageService;
 import com.atguigu.gmall.result.Result;
-import io.swagger.annotations.Api;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Api(tags = "商品基础属性接口")
+//@Api(tags = "商品基础属性接口")
 @RestController
 @CrossOrigin
 @RequestMapping("admin/product")

@@ -31,7 +31,7 @@ spring:
 #mybatis-plus:
 #  configuration:
 #    map-underscore-to-camel-case: true # 驼峰命名
-#  mapper-locations: classpath:mapper/*Mapper.xml # mapper路径
+#  mapper-locations: classpath:mapper/*mapper.xml # mapper路径
 
 #fileServer:
 #url: http://42.192.250.48:80/

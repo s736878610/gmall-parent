@@ -1,0 +1,19 @@
+package com.atguigu.gmall.cart.client;
+
+
+import org.springframework.cloud.openfeign.FeignClient;
+
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.List;
+
+@FeignClient(value = "service-cart")// 要调用的服务名
+public interface CartFeignClient {
+
+    @RequestMapping("api/cart/addCart/{skuId}/{skuNum}")// 要调用的接口路径完整路径
+    void addCart(@PathVariable("skuId") Long skuId, @PathVariable("skuNum")Integer skuNum);
+
+
+
+}

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * <p>
- * 二级分类表 Mapper 接口
+ * 二级分类表 mapper 接口
  * </p>
  *
  * @author zhongyuan

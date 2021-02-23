@@ -15,6 +15,7 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.text.Text;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.MatchQueryBuilder;
 import org.elasticsearch.index.query.NestedQueryBuilder;
@@ -32,6 +33,9 @@ import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightBuilder;
+import org.elasticsearch.search.fetch.subphase.highlight.HighlightField;
+import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.repository.ElasticsearchRepository;
@@ -39,10 +43,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -192,6 +193,14 @@ public class ListApiServiceImpl implements ListApiService {
             for (SearchHit documentFields : hitsResponse) {
                 String sourceAsString = documentFields.getSourceAsString();
                 Goods goods = JSON.parseObject(sourceAsString, Goods.class);
+
+                // 解析高亮
+                Map<String, HighlightField> highlightFields = documentFields.getHighlightFields();
+                if (highlightFields != null && highlightFields.size() > 0) {
+                    String title = highlightFields.get("title").getFragments()[0].toString();
+                    goods.setTitle(title);
+                }
+
                 goodsList.add(goods);
             }
         }
@@ -284,7 +293,6 @@ public class ListApiServiceImpl implements ListApiService {
         String order = searchParam.getOrder();
 
         // 查询
-
         // 三级分类
         if (category3Id != null) {
             // 查询条件
@@ -296,6 +304,13 @@ public class ListApiServiceImpl implements ListApiService {
         if (StringUtils.isNotEmpty(keyword)) {
             MatchQueryBuilder matchQueryBuilder = new MatchQueryBuilder("title", keyword);
             boolQueryBuilder.must(matchQueryBuilder);
+
+            // 设置高亮
+            HighlightBuilder highlightBuilder = new HighlightBuilder();
+            highlightBuilder.field("title");// 高亮字段
+            highlightBuilder.preTags("<font style='font-weight:bold' color='red'>");// 前缀
+            highlightBuilder.postTags("</font>");// 后缀
+            searchSourceBuilder.highlighter(highlightBuilder);
         }
 
         // 属性值  属性值格式 attrId:attrValue:attrName
@@ -330,14 +345,30 @@ public class ListApiServiceImpl implements ListApiService {
             boolQueryBuilder.filter(termQueryBuilder);
         }
 
-        // 排序
-        if (order != null) {
-
-        }
-
         searchSourceBuilder.query(boolQueryBuilder);// 添加查询语句  外层bool包裹着所有查询语句
 
-        // 品牌(商标)聚合查询
+
+        // 排序
+        if (StringUtils.isNotEmpty(order)) {
+            String[] split = order.split(":");
+            // 后台拼接：1:hotScore 2:price   前台页面传递：order=2:desc(order=排序字段:升序/降序)
+            String field = "";// 排序字段
+            if (split[0].equals("1")) {
+                field = "hotScore";
+            } else if (split[0].equals("2")) {
+                field = "price";
+            }
+            searchSourceBuilder.sort(field, split[1].equals("asc") ? SortOrder.ASC : SortOrder.DESC);
+        }
+
+
+        // 分页控制
+        searchSourceBuilder.from(0);// 第0页
+        searchSourceBuilder.size(60);// 每页60条数据
+
+
+        // 聚合(分组)
+        // 品牌(商标)聚合查询  terms：按照条件聚合
         TermsAggregationBuilder tmAgg = AggregationBuilders.terms("tmIdAgg").field("tmId");
         tmAgg.subAggregation(AggregationBuilders.terms("tmNameAgg").field("tmName"));// tmNameAgg是tmIdAgg的子聚合
         tmAgg.subAggregation(AggregationBuilders.terms("tmLogoUrlAgg").field("tmLogoUrl"));// tmLogoUrlAgg也是tmIdAgg的子聚合

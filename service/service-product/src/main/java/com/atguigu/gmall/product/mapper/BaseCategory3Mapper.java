@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 
 /**
  * <p>
- * 三级分类表 Mapper 接口
+ * 三级分类表 mapper 接口
  * </p>
  *
  * @author zhongyuan

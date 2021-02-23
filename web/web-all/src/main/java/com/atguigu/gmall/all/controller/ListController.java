@@ -16,7 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import javax.print.DocFlavor;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 首页展示控制器
@@ -33,7 +35,7 @@ public class ListController {
      * @param model
      * @return
      */
-    @RequestMapping("index")
+    @RequestMapping({"index.html","/"})
     public String index(Model model) {
         // 远程调用
         List<JSONObject> jsonObjects = listFeignClient.getBaseCategoryList();
@@ -77,6 +79,16 @@ public class ListController {
             }
             model.addAttribute("propsParamList", searchAttrList);
         }
+
+        if (StringUtils.isNotEmpty(searchParam.getOrder())){
+            // 排序页面数据   前台页面传递：order=2:desc
+            String[] split = searchParam.getOrder().split(":");
+            Map<String, String> orderMap = new HashMap<>();
+            orderMap.put("type",split[0]);
+            orderMap.put("sort",split[1]);
+            model.addAttribute("orderMap",orderMap);
+        }
+
         return "list/index";
     }
 
@@ -118,5 +130,7 @@ public class ListController {
 
         return urlParam;
     }
+
+
 
 }

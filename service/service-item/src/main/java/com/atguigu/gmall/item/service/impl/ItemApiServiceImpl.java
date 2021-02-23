@@ -47,6 +47,7 @@ public class ItemApiServiceImpl implements ItemApiService {
 
         // 更新热点值
         listFeignClient.hotScore(skuId);
+
         return map;
     }
 
