@@ -72,6 +72,12 @@ public class AuthFilter implements GlobalFilter {
             }
         }
 
+        if (antPathMatcher.match("**/auth/**", uri)) {
+            if (StringUtils.isEmpty(userId)){
+                return out(response, ResultCodeEnum.PERMISSION);// 拒绝访问，并返回209状态码(没有权限)
+            }
+        }
+
 
         // 白名单
         String[] authUrlsArray = authUrls.split(",");// 将字符串以","分割  封装成白名单数组

@@ -26,7 +26,7 @@ public class CartController {
         // 调用购物车服务，添加购物车信息
         cartFeignClient.addCart(skuId,skuNum);
 
-        return "redirect:cart/addCartSuccess.html?skuId=?&skuNum=?";// 静态传参(无用)
+        return "redirect:http://cart.gmall.com/cart/addCartSuccess.html?skuId=?&skuNum=?";// 静态传参(无用)
     }
 
     /**
@@ -35,9 +35,7 @@ public class CartController {
      */
     @RequestMapping({"cart/cart.html","cart.html"})
     public String cartList(){
-        String userId = "1";// 通过sso系统和网关的鉴权拦截器处理的结果
 
-        //cartFeignClient.cartList(userId);
         return "cart/index";
     }
 

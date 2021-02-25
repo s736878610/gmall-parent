@@ -10,8 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.xml.crypto.KeySelector;
 
 @RestController
-@CrossOrigin
 @RequestMapping("admin/product")
+@CrossOrigin
 public class SkuInfoController {
 
     @Autowired

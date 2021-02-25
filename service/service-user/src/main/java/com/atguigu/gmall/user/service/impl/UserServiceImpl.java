@@ -1,8 +1,10 @@
 package com.atguigu.gmall.user.service.impl;
 
 import com.atguigu.gmall.constant.RedisConst;
+import com.atguigu.gmall.model.user.UserAddress;
 import com.atguigu.gmall.model.user.UserInfo;
-import com.atguigu.gmall.user.mapper.UserMapper;
+import com.atguigu.gmall.user.mapper.UserAddressMapper;
+import com.atguigu.gmall.user.mapper.UserInfoMapper;
 import com.atguigu.gmall.user.service.UserService;
 import com.atguigu.gmall.util.MD5;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -12,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -20,7 +23,9 @@ import java.util.concurrent.TimeUnit;
 public class UserServiceImpl implements UserService {
 
     @Autowired
-    UserMapper userMapper;
+    UserInfoMapper userInfoMapper;
+    @Autowired
+    UserAddressMapper userAddressMapper;
     @Autowired
     RedisTemplate redisTemplate;
 
@@ -37,7 +42,7 @@ public class UserServiceImpl implements UserService {
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("login_name", userInfo.getLoginName());
         queryWrapper.eq("passwd", MD5.encrypt(userInfo.getPasswd()));
-        UserInfo info = userMapper.selectOne(queryWrapper);
+        UserInfo info = userInfoMapper.selectOne(queryWrapper);
 
         if (info == null) {
             // 无数据  直接跳出
@@ -51,7 +56,7 @@ public class UserServiceImpl implements UserService {
 
         // 放入缓存
         redisTemplate.opsForValue().set(RedisConst.USER_LOGIN_KEY_PREFIX + token,
-                info.getId(),
+                info.getId() + "",
                 RedisConst.USERKEY_TIMEOUT,// 60 * 60 * 24 * 7 (过期时间7天)
                 TimeUnit.SECONDS);
 
@@ -75,4 +80,13 @@ public class UserServiceImpl implements UserService {
         map.put("userId", userId);
         return map;
     }
+    
+    @Override
+    public List<UserAddress> findUserAddressListByUserId(String userId) {
+        QueryWrapper<UserAddress> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("user_id",userId);
+        List<UserAddress> userAddressList = userAddressMapper.selectList(queryWrapper);
+        return userAddressList;
+    }
+
 }

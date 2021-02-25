@@ -41,7 +41,7 @@ public class ItemApiServiceImpl implements ItemApiService {
     @Override
     public Map<String, Object> getItem(Long skuId) {
         long currentTimeMillisStart = System.currentTimeMillis();
-        Map<String, Object> map = getItemThread(skuId);
+        Map<String, Object> map = getItemSingle(skuId);
         long currentTimeMillisEnd = System.currentTimeMillis();
         System.out.println("执行时间：" + (currentTimeMillisEnd - currentTimeMillisStart));
 

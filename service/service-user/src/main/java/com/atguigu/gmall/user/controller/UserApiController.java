@@ -1,5 +1,6 @@
 package com.atguigu.gmall.user.controller;
 
+import com.atguigu.gmall.model.user.UserAddress;
 import com.atguigu.gmall.model.user.UserInfo;
 import com.atguigu.gmall.result.Result;
 import com.atguigu.gmall.user.service.UserService;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -53,6 +55,16 @@ public class UserApiController {
     Map<String, Object> verify(@PathVariable("token") String token){
         Map<String, Object> map = userService.verify(token);
         return map;
+    }
+
+    /**
+     * 获取用户地址
+     * @param userId
+     * @return
+     */
+    @RequestMapping("findUserAddressListByUserId/{userId}")
+    List<UserAddress> findUserAddressListByUserId(@PathVariable("userId") String userId){
+        return userService.findUserAddressListByUserId(userId);
     }
 
 }

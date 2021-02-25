@@ -26,6 +26,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("api/list")
+@CrossOrigin
 public class ListApiController {
 
     @Autowired

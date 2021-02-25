@@ -7,7 +7,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 
-//@MapperScan("com.atguigu.gmall.product.mapper")
+@MapperScan("com.atguigu.gmall.product.mapper")
 @SpringBootApplication
 @ComponentScan("com.atguigu")
 @EnableFeignClients
