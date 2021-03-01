@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface UserService {
-    HashMap<String, Object> login(UserInfo userInfo);
+    HashMap<String, Object> login(UserInfo userInfo,String userTempId);
 
     Map<String, Object> verify(String token);
 

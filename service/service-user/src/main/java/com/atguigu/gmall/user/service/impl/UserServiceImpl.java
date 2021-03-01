@@ -1,14 +1,16 @@
 package com.atguigu.gmall.user.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.atguigu.gmall.constant.RedisConst;
 import com.atguigu.gmall.model.user.UserAddress;
 import com.atguigu.gmall.model.user.UserInfo;
+import com.atguigu.gmall.mq.constant.MqConst;
+import com.atguigu.gmall.mq.service.RabbitService;
 import com.atguigu.gmall.user.mapper.UserAddressMapper;
 import com.atguigu.gmall.user.mapper.UserInfoMapper;
 import com.atguigu.gmall.user.service.UserService;
 import com.atguigu.gmall.util.MD5;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -28,6 +30,8 @@ public class UserServiceImpl implements UserService {
     UserAddressMapper userAddressMapper;
     @Autowired
     RedisTemplate redisTemplate;
+    @Autowired
+    RabbitService rabbitService;
 
     /**
      * 登录校验(用户点击登录按钮，异步调用)
@@ -36,7 +40,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
-    public HashMap<String, Object> login(UserInfo userInfo) {
+    public HashMap<String, Object> login(UserInfo userInfo,String userTempId) {
         HashMap<String, Object> map = new HashMap<>();
         // 查数据  比较有无数据
         QueryWrapper<UserInfo> queryWrapper = new QueryWrapper<>();
@@ -60,6 +64,15 @@ public class UserServiceImpl implements UserService {
                 RedisConst.USERKEY_TIMEOUT,// 60 * 60 * 24 * 7 (过期时间7天)
                 TimeUnit.SECONDS);
 
+
+        // 使用rabbitmq发送消息，告诉所有微服务用户登录了
+        Map<String, Object> hashMap = new HashMap<>();
+        hashMap.put("userId", info.getId() + "");
+        hashMap.put("userTempId", userTempId);
+        rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_USER_LOGIN,
+                MqConst.ROUTING_USER_LOGIN,
+                JSON.toJSONString(hashMap));
+
         return map;
     }
 
@@ -80,11 +93,17 @@ public class UserServiceImpl implements UserService {
         map.put("userId", userId);
         return map;
     }
-    
+
+    /**
+     * 根据id获取
+     *
+     * @param userId
+     * @return
+     */
     @Override
     public List<UserAddress> findUserAddressListByUserId(String userId) {
         QueryWrapper<UserAddress> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("user_id",userId);
+        queryWrapper.eq("user_id", userId);
         List<UserAddress> userAddressList = userAddressMapper.selectList(queryWrapper);
         return userAddressList;
     }

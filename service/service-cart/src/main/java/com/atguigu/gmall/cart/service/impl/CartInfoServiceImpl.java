@@ -12,9 +12,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class CartInfoServiceImpl implements CartInfoService {
@@ -68,11 +66,15 @@ public class CartInfoServiceImpl implements CartInfoService {
         queryWrapperCache.eq("user_id", userId);
         List<CartInfo> cartInfoList = cartInfoMapper.selectList(queryWrapperCache);
         if (cartInfoList != null && cartInfoList.size() > 0) {
+            // 先删除缓存  再更新缓存
+            redisTemplate.delete(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX);
+
             for (CartInfo info : cartInfoList) {
                 // 给购物车每个商品赋上单价
                 skuInfo = productFeignClient.getSkuInfoById(info.getSkuId());
                 info.setSkuPrice(skuInfo.getPrice());
 
+                // 更新缓存
                 // 大key：user:userId:cart , 小key：skuId , 小value：CartInfo
                 redisTemplate.opsForHash().put(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX,
                         info.getSkuId() + "",// redis的key只能是String
@@ -111,15 +113,13 @@ public class CartInfoServiceImpl implements CartInfoService {
                 redisTemplate.opsForHash().put(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX,
                         skuId + "",
                         cartInfo);
-            }
 
-            // 同步缓存(方法二)
-//            Map<String, Object> map = new HashMap<>();
-//            for (CartInfo cartInfo : cartInfoList) {
+                // 同步缓存(方法二)
+//                Map<String, Object> map = new HashMap<>();
 //                map.put(cartInfo.getSkuId() + "", cartInfo);
-//            }
-//            redisTemplate.boundHashOps(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX).putAll(map);
+//                redisTemplate.boundHashOps(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX).putAll(map);
 
+            }
         }
 
         return cartInfoList;
@@ -143,10 +143,53 @@ public class CartInfoServiceImpl implements CartInfoService {
         // get(user:userId:cart,skuId)    get(大key,小key)
         CartInfo cartInfoCache = (CartInfo) redisTemplate.opsForHash().get(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX,
                 cartInfo.getSkuId() + "");
+
         cartInfoCache.setIsChecked(cartInfo.getIsChecked());
+
         redisTemplate.opsForHash().put(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX,
                 cartInfo.getSkuId() + "",
                 cartInfoCache);
+    }
+
+    /**
+     * 合并购物车
+     * @param userId
+     * @param userTempId
+     */
+    @Override
+    public void mergeCart(String userId, String userTempId) {
+        // 将临时用户的购物车userId改成已登录的userId
+        QueryWrapper<CartInfo> queryWrapperTemp = new QueryWrapper<>();
+        queryWrapperTemp.eq("user_id", userTempId);
+        List<CartInfo> tempList = cartInfoMapper.selectList(queryWrapperTemp);
+        for (CartInfo tempCartInfo : tempList) {
+            tempCartInfo.setUserId(userId);
+            cartInfoMapper.update(tempCartInfo,queryWrapperTemp);
+        }
+
+
+        // 同步缓存
+        QueryWrapper<CartInfo> queryWrapperCache = new QueryWrapper<>();
+        queryWrapperCache.eq("user_id", userId);
+        List<CartInfo> cartInfoList = cartInfoMapper.selectList(queryWrapperCache);
+        if (cartInfoList != null && cartInfoList.size() > 0) {
+            // 先删除缓存  再更新缓存
+            redisTemplate.delete(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX);
+
+            for (CartInfo info : cartInfoList) {
+                // 给购物车每个商品赋上单价
+                SkuInfo skuInfo = productFeignClient.getSkuInfoById(info.getSkuId());
+                info.setSkuPrice(skuInfo.getPrice());
+
+                // 更新缓存
+                // 大key：user:userId:cart , 小key：skuId , 小value：CartInfo
+                redisTemplate.opsForHash().put(RedisConst.USER_KEY_PREFIX + userId + RedisConst.USER_CART_KEY_SUFFIX,
+                        info.getSkuId() + "",// redis的key只能是String
+                        info);
+            }
+        }
+
+
     }
 
 }

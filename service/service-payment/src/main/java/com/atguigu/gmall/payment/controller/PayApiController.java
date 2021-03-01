@@ -33,6 +33,11 @@ public class PayApiController {
         return form;
     }
 
+    /**
+     * 用户扫码支付后  支付宝同步请求的回调接口
+     * @param request
+     * @return
+     */
     @RequestMapping("alipay/callback/return")
     public String callback(HttpServletRequest request){
         // 接收支付宝回调信息

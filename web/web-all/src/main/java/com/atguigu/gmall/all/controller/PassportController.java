@@ -12,13 +12,13 @@ public class PassportController {
 
     /**
      *  跳转到登录页面
-     * @param ReturnUrl 请求要访问的url(登录成功后网关才放行请求到这个url去)
+     * @param originUrl 请求要访问的url(登录成功后网关才放行请求到这个url去)
      * @return
      */
     @RequestMapping("login.html")
-    public String login(String ReturnUrl, Model model){
+    public String login(String originUrl, Model model){
         // 将原始Url地址带到页面
-        model.addAttribute("originUrl",ReturnUrl);
+        model.addAttribute("originUrl",originUrl);
         return "login";
     }
 }

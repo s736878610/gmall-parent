@@ -4,7 +4,6 @@ import com.atguigu.gmall.model.user.UserAddress;
 import com.atguigu.gmall.model.user.UserInfo;
 import com.atguigu.gmall.result.Result;
 import com.atguigu.gmall.user.service.UserService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -38,8 +37,9 @@ public class UserApiController {
      * @return
      */
     @RequestMapping("login")
-    public Result login(@RequestBody UserInfo userInfo) {
-        HashMap<String, Object> map = userService.login(userInfo);
+    public Result login(@RequestBody UserInfo userInfo,HttpServletRequest request) {
+        String userTempId = request.getHeader("userTempId");// 给合并购物车使用
+        HashMap<String, Object> map = userService.login(userInfo,userTempId);
         if (map == null && map.size() < 0) {
             return Result.fail();
         }

@@ -10,4 +10,6 @@ public interface CartInfoService {
     List<CartInfo> cartList(String userId);
 
     void checkCart(CartInfo cartInfo);
+
+    void mergeCart(String userId, String userTempId);
 }

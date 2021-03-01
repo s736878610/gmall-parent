@@ -15,6 +15,7 @@
         <module>common-util</module>
         <module>service-util</module>
         <module>web-util</module>
+        <module>rabbit-util</module>
     </modules>
 
     <dependencies>
@@ -31,14 +32,14 @@
         </dependency>
 
         <!--swagger-->
-        <!--<dependency>-->
-            <!--<groupId>io.springfox</groupId>-->
-            <!--<artifactId>springfox-swagger2</artifactId>-->
-        <!--</dependency>-->
-        <!--<dependency>-->
-            <!--<groupId>io.springfox</groupId>-->
-            <!--<artifactId>springfox-swagger-ui</artifactId>-->
-        <!--</dependency>-->
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.springfox</groupId>
+            <artifactId>springfox-swagger-ui</artifactId>
+        </dependency>
 
         <!-- 服务调用feign -->
         <dependency>

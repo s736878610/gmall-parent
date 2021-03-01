@@ -26,7 +26,7 @@ public class CartController {
         // 调用购物车服务，添加购物车信息
         cartFeignClient.addCart(skuId,skuNum);
 
-        return "redirect:http://cart.gmall.com/cart/addCartSuccess.html?skuId=?&skuNum=?";// 静态传参(无用)
+        return "redirect:http://cart.gmall.com/cart/addCartSuccess.html?skuId=?&skuNum=?";// 静态传参
     }
 
     /**

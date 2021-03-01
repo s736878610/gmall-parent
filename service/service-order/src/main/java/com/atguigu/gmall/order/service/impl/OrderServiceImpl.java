@@ -1,5 +1,6 @@
 package com.atguigu.gmall.order.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.atguigu.gmall.cart.client.CartFeignClient;
 import com.atguigu.gmall.constant.RedisConst;
 import com.atguigu.gmall.model.enums.OrderStatus;
@@ -8,6 +9,10 @@ import com.atguigu.gmall.model.enums.ProcessStatus;
 import com.atguigu.gmall.model.order.OrderDetail;
 import com.atguigu.gmall.model.order.OrderInfo;
 import com.atguigu.gmall.model.product.SkuInfo;
+import com.atguigu.gmall.model.ware.WareOrderTask;
+import com.atguigu.gmall.model.ware.WareOrderTaskDetail;
+import com.atguigu.gmall.mq.constant.MqConst;
+import com.atguigu.gmall.mq.service.RabbitService;
 import com.atguigu.gmall.order.mapper.OrderDetailMapper;
 import com.atguigu.gmall.order.mapper.OrderInfoMapper;
 import com.atguigu.gmall.order.service.OrderService;
@@ -20,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class OrderServiceImpl implements OrderService {
@@ -38,6 +40,8 @@ public class OrderServiceImpl implements OrderService {
     RedisTemplate redisTemplate;
     @Autowired
     ProductFeignClient productFeignClient;
+    @Autowired
+    RabbitService rabbitService;
 
     /**
      * 提交订单  保存订单信息
@@ -55,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
         // 订单总金额
         orderInfo.sumTotalAmount();// 调用内部方法计算总金额
         List<OrderDetail> orderDetailList = orderInfo.getOrderDetailList();// 订单详情List
-        // 外部订单id  (全局唯一，实际是根据公司规定)
+        // 外部订单id  (全局唯一，实际开发是根据公司规定，这里随便生成)
         String timeMillis = System.currentTimeMillis() + "";
         String outTradeNo = "atguigu" + timeMillis;
         orderInfo.setOutTradeNo(outTradeNo);
@@ -73,7 +77,6 @@ public class OrderServiceImpl implements OrderService {
         // userId
         orderInfo.setUserId(Long.parseLong(userId));
 
-
         orderInfoMapper.insert(orderInfo);
         Long orderId = orderInfo.getId();
 
@@ -86,7 +89,7 @@ public class OrderServiceImpl implements OrderService {
             BigDecimal price = skuInfo.getPrice();
             BigDecimal orderPrice = orderDetail.getOrderPrice();
             int i = price.compareTo(orderPrice);
-            if (i != 0){
+            if (i != 0) {
                 return null;
             }
 
@@ -95,8 +98,8 @@ public class OrderServiceImpl implements OrderService {
         }
 
 
-        // 删除购物车数据
-        // cartFeignClient.delCart();
+        // 删除购物车数据 (为了方便测试，还未实现)
+        // cartFeignClient.delCart(userId);
 
         return orderId + "";
     }
@@ -114,6 +117,7 @@ public class OrderServiceImpl implements OrderService {
         String tradeNoCache = (String) redisTemplate.opsForValue().get(RedisConst.USER_KEY_PREFIX + userId + ":tradeNo");
         if (StringUtils.isNotEmpty(tradeNoCache) && tradeNoCache.equals(tradeNo)) {
             b = true;
+            redisTemplate.delete(RedisConst.USER_KEY_PREFIX + userId + ":tradeNo");
         }
         return b;
     }
@@ -135,6 +139,7 @@ public class OrderServiceImpl implements OrderService {
 
     /**
      * 根据id获得订单信息
+     *
      * @param orderId
      * @return
      */
@@ -142,11 +147,67 @@ public class OrderServiceImpl implements OrderService {
     public OrderInfo getOrderInfoById(Long orderId) {
         OrderInfo orderInfo = orderInfoMapper.selectById(orderId);// 订单信息
         QueryWrapper<OrderDetail> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("order_id",orderId);
+        queryWrapper.eq("order_id", orderId);
         List<OrderDetail> orderDetailList = orderDetailMapper.selectList(queryWrapper);// 订单详情
         orderInfo.setOrderDetailList(orderDetailList);// 封装订单详情
 
         return orderInfo;
+    }
+
+    /**
+     * 修改订单状态(消费mq消息)
+     *
+     * @param map
+     */
+    @Override
+    public void update(Map map) {
+        Long orderId = Long.parseLong(map.get("orderId") + "");
+        String outTradeNo = (String) map.get("outTradeNo");
+        String tradeNo = (String) map.get("tradeNo");
+        // 封装OrderInfo对象
+        OrderInfo orderInfo = new OrderInfo();
+        orderInfo.setOrderStatus(OrderStatus.PAID.getComment());
+        orderInfo.setProcessStatus(ProcessStatus.PAID.getComment());
+        orderInfo.setTrackingNo(tradeNo);
+
+        // 修改订单状态
+        QueryWrapper<OrderInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("out_trade_no", outTradeNo);
+        orderInfoMapper.update(orderInfo, queryWrapper);
+
+
+        // 发送mq消息给库存服务，将库存锁定
+        OrderInfo info = getOrderInfoById(orderId);
+        QueryWrapper<OrderDetail> wrapper = new QueryWrapper<>();
+        wrapper.eq("order_id", orderId);
+        List<OrderDetail> orderDetailList = orderDetailMapper.selectList(wrapper);
+
+        // 封装WareOrderTask对象
+        WareOrderTask wareOrderTask = new WareOrderTask();
+        wareOrderTask.setOrderId(info.getId() + "");
+        wareOrderTask.setConsignee(info.getConsignee());
+        wareOrderTask.setConsigneeTel(info.getConsigneeTel());
+        wareOrderTask.setDeliveryAddress(info.getDeliveryAddress());
+        wareOrderTask.setPaymentWay("1");// 库存系统的数据库 1：在线支付  2：货到付款
+        wareOrderTask.setTrackingNo(info.getTrackingNo());
+        wareOrderTask.setOrderBody(info.getTradeBody());
+
+        List<WareOrderTaskDetail> wareOrderTaskDetailList = new ArrayList<>();
+        for (OrderDetail orderDetail : orderDetailList) {
+            WareOrderTaskDetail wareOrderTaskDetail = new WareOrderTaskDetail();
+            wareOrderTaskDetail.setSkuId(orderDetail.getSkuId() + "");
+            wareOrderTaskDetail.setSkuName(orderDetail.getSkuName());
+            wareOrderTaskDetail.setSkuNum(orderDetail.getSkuNum());
+            wareOrderTaskDetailList.add(wareOrderTaskDetail);
+        }
+        wareOrderTask.setDetails(wareOrderTaskDetailList);
+
+
+        // 发送消息
+        rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_WARE_STOCK,
+                MqConst.ROUTING_WARE_STOCK,
+                JSON.toJSONString(wareOrderTask));
+
     }
 
 }

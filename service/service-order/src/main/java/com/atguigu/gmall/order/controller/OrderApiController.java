@@ -3,10 +3,12 @@ package com.atguigu.gmall.order.controller;
 import com.atguigu.gmall.model.order.OrderInfo;
 import com.atguigu.gmall.order.service.OrderService;
 import com.atguigu.gmall.result.Result;
-import com.google.common.collect.Ordering;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -40,8 +42,9 @@ public class OrderApiController {
                 return Result.fail();
             }
 
-            return Result.ok(orderId);
+            return Result.ok(orderId);// 返回200状态码  前端跳转到提交成功页面  用户选择支付方式
         }else {
+            // 订单重复提交  跳出
             return Result.fail();
         }
 

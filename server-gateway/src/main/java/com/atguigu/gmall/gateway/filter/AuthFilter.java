@@ -87,7 +87,7 @@ public class AuthFilter implements GlobalFilter {
                     // 如果请求中包含白名单字段，则需要携带认证Token才能访问，否则重定向到登录页面
                     if (StringUtils.isEmpty(userId)) {
                         response.setStatusCode(HttpStatus.SEE_OTHER);// 303 重定向
-                        response.getHeaders().set(HttpHeaders.LOCATION, "http://passport.gmall.com/login.html?ReturnUrl=" + uri);// set(请求头,url路径)  网关将原始地址带过去
+                        response.getHeaders().set(HttpHeaders.LOCATION, "http://passport.gmall.com/login.html?originUrl=" + uri);// set(请求头,url路径)  网关将原始地址带过去
                         Mono<Void> voidMono = response.setComplete();// 完毕，执行
                         return voidMono;
                     }

@@ -19,4 +19,6 @@ public interface CartFeignClient {
     @RequestMapping("api/cart/cartListInner")
     List<CartInfo> cartListInner();
 
+    @RequestMapping("api/cart/delCart/{userId}")
+    void delCart(@PathVariable("userId") String userId);
 }
