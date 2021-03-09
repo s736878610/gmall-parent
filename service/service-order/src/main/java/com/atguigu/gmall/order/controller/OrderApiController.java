@@ -70,4 +70,17 @@ public class OrderApiController {
         return orderService.getOrderInfoById(orderId);
     }
 
+
+    /**
+     * 保存秒杀订单
+     * @param orderInfo
+     * @param userId
+     * @return
+     */
+    @RequestMapping("saveSeckillOrder/{userId}")
+    String saveSeckillOrder(@RequestBody OrderInfo orderInfo, @PathVariable("userId") String userId){
+        String seckillOrderId = orderService.saveSeckillOrder(orderInfo,userId);
+        return seckillOrderId;
+    }
+
 }

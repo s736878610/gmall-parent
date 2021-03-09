@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class PaymentServiceImpl implements PaymentService {
@@ -65,20 +66,34 @@ public class PaymentServiceImpl implements PaymentService {
             e.printStackTrace();
         }
 
-        // 保存支付信息
-        PaymentInfo paymentInfo = new PaymentInfo();
-        paymentInfo.setTotalAmount(orderInfo.getTotalAmount());// 金额
-        paymentInfo.setOutTradeNo(orderInfo.getOutTradeNo());// 外部交易码
-        paymentInfo.setOrderId(orderId);
-        paymentInfo.setPaymentStatus(PaymentStatus.UNPAID.toString());// 支付状态
-        paymentInfo.setPaymentType(PaymentType.ALIPAY.getComment());
-        paymentInfo.setSubject(orderInfo.getOrderDetailList().get(0).getSkuName());// 标题
-        paymentInfo.setCreateTime(new Date());
+        // 检查是否重复保存支付信息
+        QueryWrapper<PaymentInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("out_trade_no", orderInfo.getOutTradeNo());
+        PaymentInfo checkOutTradeNo = paymentMapper.selectOne(wrapper);
+        if (checkOutTradeNo == null) {
+            // 保存支付信息
+            PaymentInfo paymentInfo = new PaymentInfo();
+            paymentInfo.setTotalAmount(orderInfo.getTotalAmount());// 金额
+            paymentInfo.setOutTradeNo(orderInfo.getOutTradeNo());// 外部交易码
+            paymentInfo.setOrderId(orderId);
+            paymentInfo.setPaymentStatus(PaymentStatus.UNPAID.toString());// 支付状态
+            paymentInfo.setPaymentType(PaymentType.ALIPAY.getComment());
+            paymentInfo.setSubject(orderInfo.getOrderDetailList().get(0).getSkuName());// 标题
+            paymentInfo.setCreateTime(new Date());
 
-        paymentMapper.insert(paymentInfo);
+            paymentMapper.insert(paymentInfo);
+        }
+
 
         if (response.isSuccess()) {
             System.out.println("生成支付二维码页面接口：调用成功");
+
+            // 发送延时消息队列  定时检查是否支付成功
+            rabbitService.sendDelayMessage(MqConst.EXCHANGE_PAYMENT_CHECK,
+                    MqConst.ROUTING_PAYMENT_CHECK,
+                    JSON.toJSONString(orderInfo),
+                    5,
+                    TimeUnit.SECONDS);
         } else {
             System.out.println("生成支付二维码页面接口：调用失败");
         }
@@ -100,9 +115,9 @@ public class PaymentServiceImpl implements PaymentService {
         // 使用rabbitmq发送订单已支付的消息，order服务消费消息，将订单修改为已支付
         PaymentInfo payment = paymentMapper.selectOne(queryWrapper);
         Map<String, Object> map = new HashMap<>();
-        map.put("orderId",payment.getOrderId());
-        map.put("outTradeNo",payment.getOutTradeNo());
-        map.put("tradeNo",payment.getTradeNo());
+        map.put("orderId", payment.getOrderId());
+        map.put("outTradeNo", payment.getOutTradeNo());
+        map.put("tradeNo", payment.getTradeNo());
         rabbitService.sendMessage(MqConst.EXCHANGE_DIRECT_PAYMENT_PAY,// 交换机名称
                 MqConst.ROUTING_PAYMENT_PAY,// 路由规则
                 JSON.toJSONString(map));// 消息内容
@@ -133,12 +148,27 @@ public class PaymentServiceImpl implements PaymentService {
 
         if (response.isSuccess()) {
             System.out.println("查询交易状态接口：调用成功");
-            result.put("状态：", response.getTradeStatus());
+            result.put("status", response.getTradeStatus());
         } else {
             System.out.println("查询交易状态接口：调用失败");
-            result.put("状态：", "调用失败");
+            result.put("status", "调用失败");
         }
 
         return result;
+    }
+
+    /**
+     * 查询支付订单状态
+     *
+     * @param outTradeNo
+     * @return
+     */
+    @Override
+    public String getPayStatus(String outTradeNo) {
+        QueryWrapper<PaymentInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("out_trade_no", outTradeNo);
+        PaymentInfo paymentInfo = paymentMapper.selectOne(queryWrapper);
+
+        return paymentInfo.getPaymentStatus();
     }
 }

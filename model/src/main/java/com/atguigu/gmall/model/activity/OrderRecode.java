@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * 秒杀系统  预订单对象
+ */
 @Data
 public class OrderRecode implements Serializable {
 

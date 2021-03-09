@@ -9,6 +9,14 @@ public class MqConst {
     public static final int RETRY_COUNT = 3;
 
     /**
+     * 支付定时查询
+     */
+    public static final String EXCHANGE_PAYMENT_CHECK = "exchange.payment.check";
+    public static final String ROUTING_PAYMENT_CHECK = "payment.check";
+    public static final String QUEUE_PAYMENT_CHECK  = "queue.payment.check";
+
+
+    /**
      * 用户登录
      */
     public static final String EXCHANGE_DIRECT_USER_LOGIN = "exchange.direct.user.login";

@@ -210,4 +210,48 @@ public class OrderServiceImpl implements OrderService {
 
     }
 
+    /**
+     * 保存秒杀订单
+     * @param orderInfo
+     * @param userId
+     * @return
+     */
+    @Override
+    public String saveSeckillOrder(OrderInfo orderInfo, String userId) {
+        // 订单进度：未支付
+        orderInfo.setProcessStatus(ProcessStatus.UNPAID.getComment());
+        orderInfo.setOrderStatus(OrderStatus.UNPAID.getComment());
+        // 订单总金额
+        orderInfo.sumTotalAmount();// 调用内部方法计算总金额
+        List<OrderDetail> orderDetailList = orderInfo.getOrderDetailList();// 订单详情List
+        // 外部订单id  (全局唯一，实际开发是根据公司规定，这里随便生成)
+        String timeMillis = System.currentTimeMillis() + "";
+        String outTradeNo = "atguigu" + timeMillis;
+        orderInfo.setOutTradeNo(outTradeNo);
+        // 创建时间
+        orderInfo.setCreateTime(new Date());
+        // 过期时间
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.HOUR, 1);// 当前时间向后推一天
+        Date time = calendar.getTime();
+        orderInfo.setExpireTime(time);
+        // 订单图片
+        orderInfo.setImgUrl(orderDetailList.get(0).getImgUrl());
+        // 支付方式：在线支付
+        orderInfo.setPaymentWay(PaymentWay.ONLINE.getComment());
+        // userId
+        orderInfo.setUserId(Long.parseLong(userId));
+
+        orderInfoMapper.insert(orderInfo);
+        Long orderId = orderInfo.getId();
+
+        // 订单详情
+        for (OrderDetail orderDetail : orderDetailList) {
+            orderDetail.setOrderId(orderId);
+            orderDetailMapper.insert(orderDetail);
+        }
+
+        return orderId + "";
+    }
+
 }

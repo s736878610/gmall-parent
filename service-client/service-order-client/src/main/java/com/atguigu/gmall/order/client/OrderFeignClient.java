@@ -14,4 +14,7 @@ public interface OrderFeignClient {
 
     @RequestMapping("api/order/genTradeNo/{orderId}")
     OrderInfo getOrderInfoById(@PathVariable("orderId") Long orderId);
+
+    @RequestMapping("api/order/saveSeckillOrder/{userId}")
+    String saveSeckillOrder(@RequestBody OrderInfo orderInfo, @PathVariable("userId") String userId);
 }

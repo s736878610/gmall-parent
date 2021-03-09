@@ -10,4 +10,6 @@ public interface PaymentService {
     void updatePayment(PaymentInfo paymentInfo);
 
     Map<String, Object> alipayQuery(String outTradeNo);
+
+    String getPayStatus(String outTradeNo);
 }

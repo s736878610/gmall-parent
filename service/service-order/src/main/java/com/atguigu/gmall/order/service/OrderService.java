@@ -14,4 +14,6 @@ public interface OrderService {
     OrderInfo getOrderInfoById(Long orderId);
 
     void update(Map map);
+
+    String saveSeckillOrder(OrderInfo orderInfo, String userId);
 }

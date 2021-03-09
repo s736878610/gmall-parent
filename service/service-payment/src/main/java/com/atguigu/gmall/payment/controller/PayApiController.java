@@ -30,6 +30,10 @@ public class PayApiController {
     public String alipay(@PathVariable Long orderId) throws Exception{
         String form = paymentService.alipayTradePagePay(orderId);
         System.out.println(form);
+
+        // 发送一个延时队列
+
+
         return form;
     }
 

@@ -153,6 +153,7 @@ public class CartInfoServiceImpl implements CartInfoService {
 
     /**
      * 合并购物车
+     *
      * @param userId
      * @param userTempId
      */
@@ -162,11 +163,12 @@ public class CartInfoServiceImpl implements CartInfoService {
         QueryWrapper<CartInfo> queryWrapperTemp = new QueryWrapper<>();
         queryWrapperTemp.eq("user_id", userTempId);
         List<CartInfo> tempList = cartInfoMapper.selectList(queryWrapperTemp);
-        for (CartInfo tempCartInfo : tempList) {
-            tempCartInfo.setUserId(userId);
-            cartInfoMapper.update(tempCartInfo,queryWrapperTemp);
+        if (tempList != null && tempList.size() > 0) {
+            for (CartInfo tempCartInfo : tempList) {
+                tempCartInfo.setUserId(userId);
+                cartInfoMapper.update(tempCartInfo, queryWrapperTemp);
+            }
         }
-
 
         // 同步缓存
         QueryWrapper<CartInfo> queryWrapperCache = new QueryWrapper<>();
