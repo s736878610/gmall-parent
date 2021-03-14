@@ -110,7 +110,11 @@ public class PaymentServiceImpl implements PaymentService {
     public void updatePayment(PaymentInfo paymentInfo) {
         QueryWrapper<PaymentInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("out_trade_no", paymentInfo.getOutTradeNo());
-        paymentMapper.update(paymentInfo, queryWrapper);
+
+        String payStatus = getPayStatus(paymentInfo.getOutTradeNo());
+        if (payStatus.equals("UNPAID")){// 幂等性检查
+            paymentMapper.update(paymentInfo, queryWrapper);
+        }
 
         // 使用rabbitmq发送订单已支付的消息，order服务消费消息，将订单修改为已支付
         PaymentInfo payment = paymentMapper.selectOne(queryWrapper);

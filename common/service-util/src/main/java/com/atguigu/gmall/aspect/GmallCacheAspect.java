@@ -1,9 +1,7 @@
 package com.atguigu.gmall.aspect;
 
 import com.alibaba.fastjson.JSONObject;
-import com.atguigu.gmall.constant.RedisConst;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
@@ -29,7 +27,7 @@ public class GmallCacheAspect {
     @Around("@annotation(com.atguigu.gmall.aspect.GmallCache)")
     public Object cacheAroundAdvice(ProceedingJoinPoint point) {
         Object proceed = null;
-        // 执行前
+        // 目标方法执行前
         Object[] args = point.getArgs();// 方法参数
         MethodSignature methodSignature = (MethodSignature) point.getSignature();
         Method method = methodSignature.getMethod();// 目标方法对象
@@ -60,13 +58,13 @@ public class GmallCacheAspect {
         proceed = getCache(methodSignature, commonKey);
         if (proceed == null) {
             try {
-                // redis分布式锁  确保线程安全
+                // redis分布式锁  确保线程安全，解决redis缓存击穿问题
                 String lockTag = UUID.randomUUID().toString();
                 Boolean OK = redisTemplate.opsForValue().setIfAbsent(commonKey + ":lock", lockTag, 3, TimeUnit.MINUTES);
 
                 if (OK) {
                     // 查数据库
-                    proceed = point.proceed();
+                    proceed = point.proceed();// 目标方法执行
                     if (proceed != null) {
                         // 同步缓存  Json字符串格式
                         redisTemplate.opsForValue().set(commonKey, JSONObject.toJSONString(proceed));
@@ -101,7 +99,7 @@ public class GmallCacheAspect {
             }
         }
 
-        // 执行后
+        // 目标方法执行后
 
         return proceed;
     }

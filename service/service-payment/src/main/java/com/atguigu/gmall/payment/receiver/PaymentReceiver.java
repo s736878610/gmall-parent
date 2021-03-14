@@ -38,26 +38,31 @@ public class PaymentReceiver {
         long deliveryTag = message.getMessageProperties().getDeliveryTag();// 消息标记
         OrderInfo orderInfo = JSON.parseObject(orderInfoJson, OrderInfo.class);
 
-        // 调用检查支付结果服务
+        // 调用查询支付结果服务
         // TODO
+
 
         // 如果查询支付结果是交易未创建，延时重复查询，查询5次
         Long count = orderInfo.getCount();
-        if (count < 5) {
-            orderInfo.setCount(count + 1);
-            // 发送延时消息队列  定时检查是否支付成功
-            rabbitService.sendDelayMessage(MqConst.EXCHANGE_PAYMENT_CHECK,
-                    MqConst.ROUTING_PAYMENT_CHECK,
-                    JSON.toJSONString(orderInfo),
-                    5,
-                    TimeUnit.SECONDS);
+        if (true) {// 查询支付结果是交易未创建
+            if (count < 5) {
+                orderInfo.setCount(count + 1);
+                // 发送延时消息队列  定时检查是否支付成功
+                rabbitService.sendDelayMessage(MqConst.EXCHANGE_PAYMENT_CHECK,
+                        MqConst.ROUTING_PAYMENT_CHECK,
+                        JSON.toJSONString(orderInfo),
+                        5,
+                        TimeUnit.SECONDS);
+            }
         }
 
-        // 幂等性检查
+
         String payStatus = paymentService.getPayStatus(orderInfo.getOutTradeNo());
-        if (payStatus.equals("UNPAID")) {
-            // 修改支付订单操作
-            // TODO
+        if (true) {// 查询支付结果是已支付
+            if (payStatus.equals("UNPAID")) {// 幂等性检查
+                // 修改支付订单操作
+                // TODO
+            }
         }
 
         // 手动签收消息
