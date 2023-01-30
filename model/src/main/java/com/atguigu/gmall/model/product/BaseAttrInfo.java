@@ -43,7 +43,7 @@ public class BaseAttrInfo implements Serializable {
     @ApiModelProperty(value = "分类层级")
     private Integer categoryLevel;
 
-    @ApiModelProperty(value = "平台属性")
+    @ApiModelProperty(value = "平台属性值")
     //@TableField(exist = false) 非数据库字段(游离态)
     @TableField(exist = false)
     private List<BaseAttrValue> attrValueList;

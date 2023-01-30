@@ -8,7 +8,6 @@ import com.atguigu.gmall.model.product.SkuInfo;
 import com.atguigu.gmall.model.product.SpuSaleAttr;
 import com.atguigu.gmall.product.client.ProductFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -19,7 +18,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 @Service
 public class ItemApiServiceImpl implements ItemApiService {
@@ -53,6 +51,28 @@ public class ItemApiServiceImpl implements ItemApiService {
 
     /**
      * 多线程执行(使用CompletableFuture 异步编排 技术)
+     * <p>
+     * 1.与第一条线程相关
+     * Run  没有返回值，参数是rannable
+     * Supply  有返回值，参数是supplier
+     * <p>
+     * 2.依赖其他线程的线程
+     * Then
+     * Accept  没有返回值
+     * Apply   有返回值
+     * <p>
+     * 3.同步和异步
+     * Async 异步
+     * Sync 同步
+     * 有包含Async的是异步，没有包含Async的是同步
+     * <p>
+     * 4.完成或者异常处理
+     * whenComplete 线程执行后后置处理
+     * completeExceptionally 线程的出异常处理
+     * <p>
+     * 5.线程执行组合方式
+     * AnyOf 任意线程执行完成后，主线程即可跳出
+     * AllOf 所有线程执行完成后，主线程可以跳出
      *
      * @param skuId
      * @return
